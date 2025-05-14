@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body> <h1>Order ID: {{order.order_id}}</h1>
+<body> <h1>Amount: ${{order.amount}}</h1>
+<body> <h1 class="status-text">Status: {{order.status}}</h1>
+    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+        <div class="progress-bar bg-blue-600 h-2.5 rounded-full {% if order.get_prgress == '100' %}bg-green-500{% endif %} " style="width: {{order.get_prgress}}%"></div>
+    </div>
+    
+    
+    <script>
+        var order_id = '{{order.order_id}}';
+        let socket = new WebSocket(`ws://localhost:8000/ws/pizza/${order_id}/`)
+        socket.onopen = function(e) {
+            console.log("Connection established!");
+        };
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            var value = data.payload.progress;
+            var status = data.payload.status;
+            console.log(data);
+            changeUi(value, status);
+        };
+        
+        function changeUi(value, status) {
+            var progressBar = document.querySelector('.progress-bar');
+            progressBar.style.width = value + '%';
+            var statusText = document.querySelector('.status-text');
+            statusText.innerHTML = 'Status: ' + status;
+        }
+    </script>
+
+</body>
+</html>
